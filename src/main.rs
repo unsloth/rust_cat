@@ -1,7 +1,7 @@
 use rust_cat::*;
 
 fn main() {
-    if let Err(e) = get_args().and_then(run) {
+    if let Err(e) = run() {
         eprintln!("{}", e);
         std::process::exit(1);
     }

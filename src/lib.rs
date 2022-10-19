@@ -23,16 +23,15 @@ pub struct Cli {
     number_nonblank: bool,
 }
 
-pub fn get_args() -> MyResult<Cli> {
-    Ok(Cli::parse())
-}
+pub fn run() -> MyResult<()> {
+    let cli = Cli::parse();
 
-pub fn run(cli: Cli) -> MyResult<()> {
-    for filename in cli.files {
-        match open(&filename) {
-            Err(e) => eprintln!("Failed to open {}: {}", filename, e),
-            Ok(text) => read_text(text)?,
-        }
+    if cli.number_nonblank {
+        read_text_b(cli.files)?
+    } else if cli.number {
+        read_text_n(cli.files)?
+    } else {
+        read_text(cli.files)?
     }
     Ok(())
 }
@@ -44,9 +43,53 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
     }
 }
 
-fn read_text(text: Box<dyn BufRead>) -> MyResult<()> {
-    for line in text.lines() {
-        println!("{}", line?);
+fn read_text(files: Vec<String>) -> MyResult<()> {
+    for filename in files {
+        match open(&filename) {
+            Err(e) => eprintln!("Failed to open {}: {}", filename, e),
+            Ok(text) => {
+                for line in text.lines() {
+                    println!("{}", line?);
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn read_text_n(files: Vec<String>) -> MyResult<()> {
+    let mut c = 1;
+    for filename in files {
+        match open(&filename) {
+            Err(e) => eprintln!("Failed to open {}: {}", filename, e),
+            Ok(text) => {
+                for line in text.lines() {
+                    println!("{:>6}\t{}", c, line?);
+                    c += 1;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn read_text_b(files: Vec<String>) -> MyResult<()> {
+    let mut c = 1;
+    for filename in files {
+        match open(&filename) {
+            Err(e) => eprintln!("Failed to open {}: {}", filename, e),
+            Ok(text) => {
+                for line in text.lines() {
+                    let line = line?;
+                    if line == "" {
+                        println!("{}", line)
+                    } else {
+                        println!("{:>6}\t{}", c, line);
+                        c += 1;
+                    }
+                }
+            }
+        }
     }
     Ok(())
 }
