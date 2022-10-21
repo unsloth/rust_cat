@@ -27,13 +27,12 @@ pub fn run() -> MyResult<()> {
     let cli = Cli::parse();
 
     if cli.number_nonblank {
-        read_text_b(cli.files)?
+        read_text_b(cli.files)
     } else if cli.number {
-        read_text_n(cli.files)?
+        read_text_n(cli.files)
     } else {
-        read_text(cli.files)?
+        read_text(cli.files)
     }
-    Ok(())
 }
 
 fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
@@ -81,7 +80,7 @@ fn read_text_b(files: Vec<String>) -> MyResult<()> {
             Ok(text) => {
                 for line in text.lines() {
                     let line = line?;
-                    if line == "" {
+                    if line.is_empty() {
                         println!("{}", line)
                     } else {
                         println!("{:>6}\t{}", c, line);
